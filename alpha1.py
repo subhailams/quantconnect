@@ -18,6 +18,13 @@ class FormalFluorescentYellowArmadillo(QCAlgorithm):
         self.SetBrokerageModel(BrokerageName.InteractiveBrokersBrokerage, AccountType.Margin)
         
         self.entryPrice = 0
+        
+        self.day = 0
+        self.price_0 = 0
+        self.price_5 = 0
+        
+        self.prices = []
+        
         # self.period = timedelta(31)
         # self.nextEntryTime = self.Time
 
@@ -25,18 +32,40 @@ class FormalFluorescentYellowArmadillo(QCAlgorithm):
         if not self.goog and self.appl in data:
             return
         
-        price = data[self.goog][:][-1].Close
+        price = data[self.goog].Close
+        self.prices.append(price)
         
-        if not self.Portfolio.Invested:
+        if len(self.prices) > 20:
+            for i in range(5,20):
+                curr = self.prices[i] 
+                past = self.prices[i-5]
+                aplha1 = -1 * ((curr - past) / past)
+                self.Log("Alpha1: " + str(aplha1))
+        
+        # if self.day == 0: # First day
+        #     self.price_0 = data[self.goog].Close
             
-            last_price =data[self.goog][:][-6].Close
+        
+        # elif self.day % 5 == 0:
+        #     self.price_5 = data[self.goog].Close
             
-            if price < last_price:
-                self.SetHoldings([PortfolioTarget("GOOG", 1), PortfolioTarget("APPL", -0.5)])
-                self.Log("BUY GOOG @" + str(price))
-            else:
-                self.SetHoldings([PortfolioTarget("GOOG", -1), PortfolioTarget("APPL", 0.5)])
-                self.Log("SELL GOOG @" + str(price))               
+        #     self.Log(str(self.day) + ":" + str(self.price_0) + "," + str(self.price_5))
+        #     self.price_0 = self.price_5
+            
+        
+        # self.day += 1
+    
+        
+        # if not self.Portfolio.Invested:
+            
+        #     last_price =data[self.goog][-6].Close
+            
+        #     if price < last_price:
+        #         self.SetHoldings([PortfolioTarget("GOOG", 1), PortfolioTarget("APPL", -0.5)])
+        #         self.Log("BUY GOOG @" + str(price))
+        #     else:
+        #         self.SetHoldings([PortfolioTarget("GOOG", -1), PortfolioTarget("APPL", 0.5)])
+        #         self.Log("SELL GOOG @" + str(price))               
             
         #     if self.nextEntryTime <= self.Time:
         #         self.SetHoldings(self.spy, 1)
